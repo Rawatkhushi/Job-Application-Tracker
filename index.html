@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobPulse</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #f5f4f0;
+--surface: #ffffff;
+--surface2: #f0efe9;
+--border: #e0dfd8;
+--border2: #cccbc3;
+--text: #1a1a18;
+--muted: #888780;
+--accent: #4a3ff5;
+--accent-light: #eeecff;
+--applied: #1d6fb5;
+--applied-bg: #e6f0fa;
+--interview: #9a6200;
+--interview-bg: #fef3d9;
+--rejected: #a32d2d;
+--rejected-bg: #fdf0f0;
+--offer: #0f6e56;
+--offer-bg: #e5f6f0;
+--radius: 12px;
+--radius-sm: 8px;
+--shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+--shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+background: var(--bg);
+color: var(--text);
+font-family: 'DM Mono', monospace;
+min-height: 100vh;
+font-size: 13px;
+}
+.layout {
+display: grid;
+grid-template-columns: 228px 1fr;
+min-height: 100vh;
+}
+.sidebar {
+background: var(--surface);
+border-right: 1px solid var(--border);
+padding: 28px 18px;
+display: flex;
+flex-direction: column;
+gap: 28px;
+position: sticky;
+top: 0;
+height: 100vh;
+overflow-y: auto;
+}
+.logo {
+font-family: 'Syne', sans-serif;
+font-size: 1.15rem;
+font-weight: 800;
+color: var(--text);
+letter-spacing: -0.5px;
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 0 6px;
+}
+.logo-dot {
+width: 7px; height: 7px;
+border-radius: 50%;
+background: var(--accent);
+flex-shrink: 0;
+}
+.nav-group { display: flex; flex-direction: column; gap: 2px; }
+.nav-section-label {
+font-size: 0.6rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(--muted);
+margin-bottom: 4px;
+padding: 0 8px;
+}
+.nav-item {
+display: flex;
+align-items: center;
+gap: 9px;
+padding: 8px 10px;
+border-radius: var(--radius-sm);
+cursor: pointer;
+color: var(--muted);
+font-size: 0.76rem;
+transition: all 0.13s;
+user-select: none;
+border: none;
+background: none;
+width: 100%;
+text-align: left;
+font-family: 'DM Mono', monospace;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+background: var(--accent-light);
+color: var(--accent);
+font-weight: 500;
+}
+.nav-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.65; }
+.nav-item.active .nav-icon { opacity: 1; }
+.sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+.btn-add {
+width: 100%;
+background: var(--accent);
+color: #fff;
+border: none;
+border-radius: var(--radius-sm);
+padding: 10px 14px;
+font-family: 'DM Mono', monospace;
+font-size: 0.76rem;
+font-weight: 500;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 7px;
+transition: all 0.13s;
+}
+.btn-add:hover { background: #3830d4; box-shadow: var(--shadow-md); }
+.btn-export {
+width: 100%;
+background: none;
+border: 1px solid var(--border);
+color: var(--muted);
+border-radius: var(--radius-sm);
+padding: 8px 14px;
+font-family: 'DM Mono', monospace;
+font-size: 0.72rem;
+cursor: pointer;
+transition: all 0.13s;
+}
+.btn-export:hover { border-color: var(--border2); color: var(--text); }
+.main { padding: 32px 36px; }
+.page-header { margin-bottom: 24px; }
+.page-title {
+font-family: 'Syne', sans-serif;
+font-size: 1.3rem;
+font-weight: 700;
+color: var(--text);
+letter-spacing: -0.3px;
+}
+.page-subtitle { color: var(--muted); font-size: 0.72rem; margin-top: 2px; }
+.stats-grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 10px;
+margin-bottom: 20px;
+}
+.stat-card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 14px 16px;
+box-shadow: var(--shadow);
+}
+.stat-label {
+font-size: 0.6rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+color: var(--muted);
+margin-bottom: 4px;
+}
+.stat-num {
+font-family: 'Syne', sans-serif;
+font-size: 1.65rem;
+font-weight: 700;
+line-height: 1;
+color: var(--text);
+}
+.stat-sub { font-size: 0.62rem; color: var(--muted); margin-top: 3px; }
+.chart-row {
+display: grid;
+grid-template-columns: 1.7fr 1fr;
+gap: 12px;
+margin-bottom: 20px;
+}
+.card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 18px 20px;
+box-shadow: var(--shadow);
+}
+.card-title {
+font-family: 'Syne', sans-serif;
+font-size: 0.82rem;
+font-weight: 600;
+color: var(--text);
+margin-bottom: 14px;
+}
+.chart-wrap { position: relative; height: 170px; }
+.donut-wrap {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+.donut-canvas-wrap {
+position: relative;
+flex-shrink: 0;
+}
+.donut-center {
+position: absolute;
+top: 50%; left: 50%;
+transform: translate(-50%, -50%);
+text-align: center;
+pointer-events: none;
+}
+.donut-center-num {
+font-family: 'Syne', sans-serif;
+font-size: 1.3rem;
+font-weight: 700;
+color: var(--text);
+line-height: 1;
+}
+.donut-center-label {
+font-size: 0.58rem;
+color: var(--muted);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+.legend { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.legend-item {
+display: flex;
+align-items: center;
+gap: 7px;
+font-size: 0.7rem;
+color: var(--muted);
+}
+.legend-dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+.legend-val { margin-left: auto; font-weight: 500; color: var(--text); }
+.controls-row {
+display: flex;
+gap: 8px;
+margin-bottom: 12px;
+align-items: center;
+}
+.search-wrap { flex: 1; position: relative; }
+.search-wrap svg {
+position: absolute;
+left: 11px;
+top: 50%;
+transform: translateY(-50%);
+color: var(--muted);
+pointer-events: none;
+}
+input[type="text"], input[type="date"], input[type="url"], textarea, select {
+background: var(--surface);
+border: 1px solid var(--border);
+color: var(--text);
+font-family: 'DM Mono', monospace;
+font-size: 0.76rem;
+border-radius: var(--radius-sm);
+padding: 8px 11px;
+outline: none;
+transition: border-color 0.13s, box-shadow 0.13s;
+width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+border-color: var(--accent);
+box-shadow: 0 0 0 3px rgba(74,63,245,0.1);
+}
+.search-wrap input { padding-left: 33px; }
+select {
+cursor: pointer;
+appearance: none;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23888780' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+background-repeat: no-repeat;
+background-position: right 9px center;
+padding-right: 26px;
+width: auto;
+min-width: 120px;
+}
+.sort-tabs {
+display: flex;
+gap: 2px;
+background: var(--bg);
+border: 1px solid var(--border);
+border-radius: var(--radius-sm);
+padding: 2px;
+}
+.sort-tab {
+background: none;
+border: none;
+font-family: 'DM Mono', monospace;
+font-size: 0.66rem;
+color: var(--muted);
+padding: 4px 9px;
+border-radius: 5px;
+cursor: pointer;
+transition: all 0.12s;
+white-space: nowrap;
+}
+.sort-tab.active {
+background: var(--surface);
+color: var(--text);
+box-shadow: var(--shadow);
+}
+.count-pill {
+font-size: 0.66rem;
+color: var(--muted);
+background: var(--surface2);
+border: 1px solid var(--border);
+border-radius: 99px;
+padding: 3px 9px;
+white-space: nowrap;
+}
+.table-wrap {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+overflow: hidden;
+box-shadow: var(--shadow);
+}
+table { width: 100%; border-collapse: collapse; }
+thead tr {
+background: var(--bg);
+border-bottom: 1px solid var(--border);
+}
+th {
+padding: 9px 14px;
+text-align: left;
+font-size: 0.6rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+color: var(--muted);
+font-weight: 500;
+white-space: nowrap;
+}
+td {
+padding: 12px 14px;
+vertical-align: middle;
+border-bottom: 1px solid var(--border);
+font-size: 0.76rem;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; cursor: pointer; }
+tbody tr:hover { background: var(--surface2); }
+.job-role { font-weight: 500; color: var(--text); font-size: 0.8rem; }
+.job-company { color: var(--muted); font-size: 0.7rem; margin-top: 1px; }
+.badge {
+font-size: 0.6rem;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+font-weight: 500;
+padding: 2px 8px;
+border-radius: 99px;
+white-space: nowrap;
+display: inline-block;
+}
+.badge-applied   { color: var(--applied);   background: var(--applied-bg); }
+.badge-interview { color: var(--interview); background: var(--interview-bg); }
+.badge-rejected  { color: var(--rejected);  background: var(--rejected-bg); }
+.badge-offer     { color: var(--offer);     background: var(--offer-bg); }
+.dl-text { font-size: 0.7rem; color: var(--muted); }
+.dl-soon { color: var(--interview) !important; }
+.dl-past { color: var(--rejected) !important; }
+.row-actions {
+display: flex;
+gap: 4px;
+opacity: 0;
+transition: opacity 0.13s;
+}
+tbody tr:hover .row-actions { opacity: 1; }
+.icon-btn {
+background: none;
+border: 1px solid var(--border);
+color: var(--muted);
+border-radius: 5px;
+padding: 3px 8px;
+cursor: pointer;
+font-size: 0.66rem;
+font-family: 'DM Mono', monospace;
+transition: all 0.12s;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.icon-btn.del:hover { border-color: var(--rejected); color: var(--rejected); background: var(--rejected-bg); }
+.empty-row td { text-align: center; padding: 48px; color: var(--muted); }
+.modal-backdrop {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.25);
+backdrop-filter: blur(4px);
+z-index: 100;
+display: flex;
+align-items: center;
+justify-content: center;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.18s;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 16px;
+padding: 26px 28px;
+width: 100%;
+max-width: 490px;
+margin: 16px;
+box-shadow: var(--shadow-md);
+transform: translateY(10px) scale(0.98);
+transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+max-height: 90vh;
+overflow-y: auto;
+}
+.modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+.modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+}
+.modal-title {
+font-family: 'Syne', sans-serif;
+font-size: 1rem;
+font-weight: 700;
+}
+.close-btn {
+background: none;
+border: none;
+color: var(--muted);
+cursor: pointer;
+font-size: 1.2rem;
+line-height: 1;
+padding: 4px 6px;
+border-radius: 6px;
+transition: all 0.12s;
+}
+.close-btn:hover { background: var(--surface2); color: var(--text); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-field { display: flex; flex-direction: column; gap: 4px; }
+.form-field.full { grid-column: 1 / -1; }
+label {
+font-size: 0.6rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+color: var(--muted);
+}
+textarea { resize: vertical; min-height: 68px; }
+.form-actions {
+display: flex;
+justify-content: flex-end;
+gap: 7px;
+margin-top: 18px;
+padding-top: 14px;
+border-top: 1px solid var(--border);
+}
+.btn {
+font-family: 'DM Mono', monospace;
+font-size: 0.73rem;
+font-weight: 500;
+border-radius: var(--radius-sm);
+padding: 8px 14px;
+cursor: pointer;
+border: none;
+transition: all 0.12s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #3830d4; }
+.btn-ghost { background: none; border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+.toast {
+position: fixed;
+bottom: 20px;
+right: 20px;
+background: var(--text);
+color: #fff;
+border-radius: var(--radius-sm);
+padding: 9px 14px;
+font-size: 0.72rem;
+z-index: 200;
+transform: translateY(12px);
+opacity: 0;
+transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+display: flex;
+align-items: center;
+gap: 7px;
+box-shadow: var(--shadow-md);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+.toast-dot.warn { background: #fbbf24; }
+.toast-dot.err  { background: #f87171; }
+@media (max-width: 760px) {
+.layout { grid-template-columns: 1fr; }
+.sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 14px; gap: 10px; }
+.main { padding: 18px 14px; }
+.stats-grid { grid-template-columns: 1fr 1fr; }
+.chart-row { grid-template-columns: 1fr; }
+.form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+<div class="logo">
+<div class="logo-dot"></div>
+JobPulse
+</div>
+<div class="nav-group">
+<div class="nav-section-label">Views</div>
+<button class="nav-item active" id="nav-dashboard" onclick="setView('dashboard', this)">
+<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+Dashboard
+</button>
+<button class="nav-item" id="nav-applications" onclick="setView('applications', this)">
+<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+Applications
+</button>
+</div>
+<div class="nav-group">
+<div class="nav-section-label">Filter</div>
+<button class="nav-item" onclick="quickFilter('')">All</button>
+<button class="nav-item" onclick="quickFilter('Applied')">Applied</button>
+<button class="nav-item" onclick="quickFilter('Interview')">Interview</button>
+<button class="nav-item" onclick="quickFilter('Offer')">Offer</button>
+<button class="nav-item" onclick="quickFilter('Rejected')">Rejected</button>
+</div>
+<div class="sidebar-footer">
+<button class="btn-add" onclick="openModal()">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+New Application
+</button>
+<button class="btn-export" onclick="exportCSV()">Export CSV</button>
+</div>
+</aside>
+<main class="main">
+<div id="view-dashboard">
+<div class="page-header">
+<div class="page-title">Dashboard</div>
+<div class="page-subtitle" id="dash-sub">Overview of your job search</div>
+</div>
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-label">Total</div>
+<div class="stat-num" id="st-total">0</div>
+<div class="stat-sub">applications tracked</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Interviews</div>
+<div class="stat-num" style="color:var(--interview)" id="st-iv">0</div>
+<div class="stat-sub" id="st-iv-rate">&mdash;</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Offers</div>
+<div class="stat-num" style="color:var(--offer)" id="st-of">0</div>
+<div class="stat-sub" id="st-of-rate">&mdash;</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Rejected</div>
+<div class="stat-num" style="color:var(--rejected)" id="st-rj">0</div>
+<div class="stat-sub" id="st-rj-rate">&mdash;</div>
+</div>
+</div>
+<div class="chart-row">
+<div class="card">
+<div class="card-title">Applications over time</div>
+<div class="chart-wrap">
+<canvas id="timelineChart"></canvas>
+</div>
+</div>
+<div class="card">
+<div class="card-title">Status breakdown</div>
+<div class="donut-wrap">
+<div class="donut-canvas-wrap">
+<canvas id="donutChart" width="140" height="140"></canvas>
+<div class="donut-center">
+<div class="donut-center-num" id="donut-num">0</div>
+<div class="donut-center-label">total</div>
+</div>
+</div>
+<div class="legend" id="donut-legend"></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-title">Recent applications</div>
+<table>
+<thead>
+<tr>
+<th>Role / Company</th>
+<th>Status</th>
+<th>Applied</th>
+<th>Deadline</th>
+</tr>
+</thead>
+<tbody id="recent-body"></tbody>
+</table>
+</div>
+</div>
+<div id="view-applications" style="display:none">
+<div class="page-header">
+<div class="page-title">Applications</div>
+<div class="page-subtitle">All tracked roles</div>
+</div>
+<div class="controls-row">
+<div class="search-wrap">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<input type="text" id="searchInput" placeholder="Search role, company, location..." oninput="renderTable()">
+</div>
+<select id="filterStatus" onchange="renderTable()">
+<option value="">All statuses</option>
+<option value="Applied">Applied</option>
+<option value="Interview">Interview</option>
+<option value="Offer">Offer</option>
+<option value="Rejected">Rejected</option>
+</select>
+<div class="sort-tabs">
+<button class="sort-tab active" data-sort="date" onclick="setSort(this)">Date</button>
+<button class="sort-tab" data-sort="deadline" onclick="setSort(this)">Deadline</button>
+<button class="sort-tab" data-sort="company" onclick="setSort(this)">Company</button>
+</div>
+<div class="count-pill" id="countPill">0</div>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Role / Company</th>
+<th>Status</th>
+<th>Applied</th>
+<th>Deadline</th>
+<th>Salary</th>
+<th>Notes</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="jobsBody"></tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModalOnBackdrop(event)">
+<div class="modal">
+<div class="modal-header">
+<div class="modal-title" id="modalTitle">New Application</div>
+<button class="close-btn" onclick="closeModal()">&times;</button>
+</div>
+<div class="form-grid">
+<div class="form-field">
+<label>Job Title</label>
+<input type="text" id="fRole" placeholder="Frontend Engineer">
+</div>
+<div class="form-field">
+<label>Company</label>
+<input type="text" id="fCompany" placeholder="Acme Corp">
+</div>
+<div class="form-field">
+<label>Location</label>
+<input type="text" id="fLocation" placeholder="Remote / Delhi / Hybrid">
+</div>
+<div class="form-field">
+<label>Status</label>
+<select id="fStatus">
+<option>Applied</option>
+<option>Interview</option>
+<option>Offer</option>
+<option>Rejected</option>
+</select>
+</div>
+<div class="form-field">
+<label>Applied Date</label>
+<input type="date" id="fDate">
+</div>
+<div class="form-field">
+<label>Deadline</label>
+<input type="date" id="fDeadline">
+</div>
+<div class="form-field full">
+<label>Salary</label>
+<input type="text" id="fSalary" placeholder="18L - 24L or $80k - $100k">
+</div>
+<div class="form-field full">
+<label>Job URL</label>
+<input type="url" id="fUrl" placeholder="https://...">
+</div>
+<div class="form-field full">
+<label>Notes</label>
+<textarea id="fNotes" placeholder="Recruiter name, round status, next steps..."></textarea>
+</div>
+</div>
+<div class="form-actions">
+<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+<button class="btn btn-primary" onclick="saveJob()">Save</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast">
+<div class="toast-dot" id="toastDot"></div>
+<span id="toastMsg"></span>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DB_KEY = 'jobpulse_v3';
+let jobs = [], editingId = null, currentSort = 'date';
+let tlChart, dnChart;
+
+function loadJobs() { try { jobs = JSON.parse(localStorage.getItem(DB_KEY)) || []; } catch { jobs = []; } }
+function saveJobs() { localStorage.setItem(DB_KEY, JSON.stringify(jobs)); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function setView(name, btn) {
+  document.getElementById('view-dashboard').style.display    = name === 'dashboard'    ? '' : 'none';
+  document.getElementById('view-applications').style.display = name === 'applications' ? '' : 'none';
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (name === 'dashboard')    renderDashboard();
+  if (name === 'applications') renderTable();
+}
+
+function quickFilter(s) {
+  document.getElementById('filterStatus').value = s;
+  setView('applications', document.getElementById('nav-applications'));
+}
+
+function pct(n, t) { return t ? Math.round(n / t * 100) : 0; }
+
+function renderDashboard() {
+  const total = jobs.length;
+  const iv = jobs.filter(j => j.status === 'Interview').length;
+  const of = jobs.filter(j => j.status === 'Offer').length;
+  const rj = jobs.filter(j => j.status === 'Rejected').length;
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-iv').textContent    = iv;
+  document.getElementById('st-of').textContent    = of;
+  document.getElementById('st-rj').textContent    = rj;
+  document.getElementById('st-iv-rate').textContent = pct(iv,total) + '% interview rate';
+  document.getElementById('st-of-rate').textContent = pct(of,total) + '% offer rate';
+  document.getElementById('st-rj-rate').textContent = pct(rj,total) + '% rejection rate';
+  const dates = jobs.map(j => j.appDate).filter(Boolean).sort();
+  if (dates.length > 1) document.getElementById('dash-sub').textContent = 'Tracking since ' + fmtDate(dates[0]);
+  buildTimeline(); buildDonut(); renderRecent();
+}
+
+const COLORS = { Applied:'#378ADD', Interview:'#EF9F27', Offer:'#1D9E75', Rejected:'#E24B4A' };
+
+function buildTimeline() {
+  const months = {};
+  jobs.forEach(j => {
+    if (!j.appDate) return;
+    const k = j.appDate.slice(0,7);
+    months[k] = (months[k]||0) + 1;
+  });
+  const sorted = Object.keys(months).sort();
+  const labels = sorted.map(m => { const [,mo] = m.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo-1]; });
+  const data   = sorted.map(k => months[k]);
+  if (tlChart) tlChart.destroy();
+  tlChart = new Chart(document.getElementById('timelineChart'), {
+    type: 'bar',
+    data: {
+      labels: labels.length ? labels : ['No data'],
+      datasets: [{
+        data: data.length ? data : [0],
+        backgroundColor: '#4a3ff515',
+        borderColor: '#4a3ff5',
+        borderWidth: 1.5,
+        borderRadius: 5,
+        hoverBackgroundColor: '#4a3ff525',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1a18',
+          titleColor: '#e8e8e8',
+          bodyColor: '#999',
+          padding: 10,
+          cornerRadius: 8,
+          callbacks: { label: ctx => ' ' + ctx.raw + ' application' + (ctx.raw !== 1 ? 's' : '') }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#888780', font: { family: 'DM Mono', size: 10 }, maxRotation: 0 }, border: { display: false } },
+        y: { grid: { color: '#e0dfd860' }, ticks: { color: '#888780', font: { family: 'DM Mono', size: 10 }, stepSize: 1 }, border: { display: false } }
+      }
+    }
+  });
+}
+
+function buildDonut() {
+  const counts = { Applied:0, Interview:0, Offer:0, Rejected:0 };
+  jobs.forEach(j => { if (counts[j.status] !== undefined) counts[j.status]++; });
+  const labels = Object.keys(counts);
+  const data   = labels.map(l => counts[l]);
+  const empty  = data.every(d => d === 0);
+  document.getElementById('donut-num').textContent = jobs.length;
+  if (dnChart) dnChart.destroy();
+  dnChart = new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: empty ? [1] : data,
+        backgroundColor: empty ? ['#e0dfd8'] : labels.map(l => COLORS[l]),
+        borderWidth: 0,
+        hoverOffset: 4,
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1a18', titleColor: '#e8e8e8', bodyColor: '#999',
+          padding: 10, cornerRadius: 8,
+          callbacks: { label: ctx => !empty ? ' ' + ctx.raw : ' -' }
+        }
+      }
+    }
+  });
+  document.getElementById('donut-legend').innerHTML = labels.map(l => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${COLORS[l]}"></div>
+      <span>${l}</span>
+      <span class="legend-val">${counts[l]}</span>
+    </div>`).join('');
+}
+
+function renderRecent() {
+  const recent = [...jobs].sort((a,b) => (b.dateAdded||0)-(a.dateAdded||0)).slice(0,5);
+  const tbody = document.getElementById('recent-body');
+  if (!recent.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No applications yet.</td></tr>'; return;
+  }
+  tbody.innerHTML = recent.map(j => `
+    <tr onclick="quickFilter('')">
+      <td><div class="job-role">${esc(j.role)}</div><div class="job-company">${esc(j.company)}</div></td>
+      <td><span class="${bc(j.status)}">${j.status}</span></td>
+      <td class="dl-text">${j.appDate ? fmtDate(j.appDate) : '-'}</td>
+      <td class="dl-text ${dlc(j.deadline)}">${j.deadline ? fmtDate(j.deadline) : '-'}</td>
+    </tr>`).join('');
+}
+
+function getFiltered() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const s = document.getElementById('filterStatus').value;
+  return jobs.filter(j => {
+    const mq = !q || [j.role,j.company,j.location].some(f => f?.toLowerCase().includes(q));
+    const ms = !s || j.status === s;
+    return mq && ms;
+  }).sort((a,b) => {
+    if (currentSort === 'date')     return (b.dateAdded||0) - (a.dateAdded||0);
+    if (currentSort === 'deadline') return (a.deadline||'9999') < (b.deadline||'9999') ? -1 : 1;
+    if (currentSort === 'company')  return (a.company||'').localeCompare(b.company||'');
+    return 0;
+  });
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  document.getElementById('countPill').textContent = filtered.length;
+  const tbody = document.getElementById('jobsBody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No applications found.</td></tr>'; return;
+  }
+  tbody.innerHTML = filtered.map(j => `
+    <tr>
+      <td>
+        <div class="job-role">${esc(j.role)}</div>
+        <div class="job-company">${esc(j.company)}${j.location ? ' · ' + esc(j.location) : ''}</div>
+      </td>
+      <td><span class="${bc(j.status)}">${j.status}</span></td>
+      <td class="dl-text">${j.appDate ? fmtDate(j.appDate) : '-'}</td>
+      <td class="dl-text ${dlc(j.deadline)}">${j.deadline ? fmtDate(j.deadline) : '-'}</td>
+      <td class="dl-text">${esc(j.salary||'-')}</td>
+      <td class="dl-text" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.notes||'')}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" onclick="event.stopPropagation();editJob('${j.id}')">Edit</button>
+          <button class="icon-btn del" onclick="event.stopPropagation();deleteJob('${j.id}')">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function setSort(btn) {
+  document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSort = btn.dataset.sort;
+  renderTable();
+}
+
+function esc(s='') { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  return parseInt(day) + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + y.slice(2);
+}
+function dlc(dl) {
+  if (!dl) return '';
+  const diff = (new Date(dl) - new Date()) / 86400000;
+  return diff < 0 ? 'dl-past' : diff < 3 ? 'dl-soon' : '';
+}
+function bc(s) { return 'badge badge-' + s.toLowerCase(); }
+
+function openModal(job=null) {
+  editingId = job?.id || null;
+  document.getElementById('modalTitle').textContent = job ? 'Edit Application' : 'New Application';
+  const map = { fRole:'role', fCompany:'company', fLocation:'location', fStatus:'status', fDate:'appDate', fDeadline:'deadline', fSalary:'salary', fUrl:'url', fNotes:'notes' };
+  Object.entries(map).forEach(([id,k]) => document.getElementById(id).value = job ? (job[k]||'') : (k==='status' ? 'Applied' : ''));
+  if (!job) document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+function closeModal() { document.getElementById('modalBackdrop').classList.remove('open'); editingId = null; }
+function closeModalOnBackdrop(e) { if (e.target === document.getElementById('modalBackdrop')) closeModal(); }
+
+function saveJob() {
+  const role = document.getElementById('fRole').value.trim();
+  const company = document.getElementById('fCompany').value.trim();
+  if (!role || !company) { toast('Role and Company are required.', 'err'); return; }
+  const job = {
+    id: editingId || genId(), role, company,
+    location: document.getElementById('fLocation').value.trim(),
+    status:   document.getElementById('fStatus').value,
+    appDate:  document.getElementById('fDate').value,
+    deadline: document.getElementById('fDeadline').value,
+    salary:   document.getElementById('fSalary').value.trim(),
+    url:      document.getElementById('fUrl').value.trim(),
+    notes:    document.getElementById('fNotes').value.trim(),
+    dateAdded: editingId ? (jobs.find(j=>j.id===editingId)?.dateAdded||Date.now()) : Date.now(),
+  };
+  if (editingId) { jobs = jobs.map(j => j.id===editingId ? job : j); toast('Application updated.'); }
+  else           { jobs.unshift(job); toast('Application saved.'); }
+  saveJobs(); closeModal(); renderTable(); renderDashboard();
+}
+
+function editJob(id) { const j = jobs.find(j=>j.id===id); if (j) openModal(j); }
+
+function deleteJob(id) {
+  const j = jobs.find(j=>j.id===id);
+  if (!j || !confirm('Remove application to ' + j.company + '?')) return;
+  jobs = jobs.filter(j=>j.id!==id);
+  saveJobs(); renderTable(); renderDashboard(); toast('Removed.', 'warn');
+}
+
+function exportCSV() {
+  if (!jobs.length) { toast('No data to export.', 'warn'); return; }
+  const rows = jobs.map(j => ['Role','Company','Location','Status','Applied','Deadline','Salary','URL','Notes']
+    .map((_, i) => [j.role,j.company,j.location,j.status,j.appDate,j.deadline,j.salary,j.url,(j.notes||'').replace(/\n/g,' ')][i])
+    .map(v => '"' + (v||'').replace(/"/g,'""') + '"').join(','));
+  const blob = new Blob([['Role,Company,Location,Status,Applied,Deadline,Salary,URL,Notes', ...rows].join('\n')], {type:'text/csv'});
+  const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob),download:'jobpulse.csv'});
+  a.click(); URL.revokeObjectURL(a.href); toast('Exported.');
+}
+
+let tt;
+function toast(msg, type='ok') {
+  clearTimeout(tt);
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastDot').className = 'toast-dot' + (type==='warn'?' warn':type==='err'?' err':'');
+  t.classList.add('show');
+  tt = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); openModal(); }
+});
+
+loadJobs();
+if (!jobs.length) {
+  const n = Date.now();
+  jobs = [
+    {id:genId(),role:'Senior Frontend Engineer',company:'Stripe',location:'Remote',status:'Interview',appDate:'2026-03-10',deadline:'2026-03-25',salary:'$130k - $160k',url:'',notes:'Technical round scheduled.',dateAdded:n-86400000*5},
+    {id:genId(),role:'Product Engineer',company:'Linear',location:'Remote',status:'Applied',appDate:'2026-03-15',deadline:'2026-03-30',salary:'$110k - $140k',url:'',notes:'Referred by Aarav Singh.',dateAdded:n-86400000*2},
+    {id:genId(),role:'Software Engineer II',company:'Razorpay',location:'Bengaluru',status:'Rejected',appDate:'2026-02-20',deadline:'',salary:'30L - 42L',url:'',notes:'Rejected after round 2.',dateAdded:n-86400000*18},
+    {id:genId(),role:'Full Stack Developer',company:'Notion',location:'Hybrid - SF',status:'Applied',appDate:'2026-03-18',deadline:'2026-04-05',salary:'$125k - $150k',url:'',notes:'',dateAdded:n-86400000*0.5},
+    {id:genId(),role:'Staff Engineer',company:'Vercel',location:'Remote',status:'Offer',appDate:'2026-02-10',deadline:'2026-03-20',salary:'$160k - $200k',url:'',notes:'Offer extended. Evaluating terms.',dateAdded:n-86400000*25},
+  ];
+  saveJobs();
+}
+renderDashboard();
+</script>
+</body>
+</html>
